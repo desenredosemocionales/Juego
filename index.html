@@ -1,0 +1,1569 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>Desenredos Emocionales - Juego de Parejas</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow-y: auto !important;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: #fff5d9;
+            color: #1f2937;
+        }
+
+        .app-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            width: 100%;
+            min-height: 100vh;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 1rem 3rem 1rem;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .nav-buttons {
+            position: fixed;
+            top: 0.75rem;
+            right: 0.75rem;
+            display: flex;
+            gap: 0.6rem;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #fbb9d2;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: #024c38;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.96);
+            background: #02382a;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #024c38;
+            padding: 0.6rem 1.2rem;
+            border: 2px solid #024c38;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.96);
+            background: #e6f7f2;
+        }
+
+        .btn-end {
+            background: #6f1a26;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        .btn-end:active {
+            transform: scale(0.96);
+            background: #8b2a3a;
+        }
+
+        .card-panel {
+            background: white;
+            border-radius: 28px;
+            padding: 1.8rem;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .rhythm-grid,
+        .modality-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .rhythm-card,
+        .modality-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1.8rem 1.2rem;
+            flex: 1;
+            min-width: 220px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid #e2e8f0;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .rhythm-card:hover,
+        .modality-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .rhythm-card.selected,
+        .modality-card.selected {
+            border-color: #fbb9d2;
+            background: #fff5e6;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(251, 185, 210, 0.3);
+        }
+
+        .rhythm-card h3 {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #6f1a26;
+            margin: 0.5rem 0;
+        }
+
+        .modality-icon {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .modality-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #6f1a26;
+            margin: 0.5rem 0;
+        }
+
+        .modality-card p {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #4a5568;
+            margin-top: 0.5rem;
+        }
+
+        .deck-card {
+            border-radius: 16px;
+            padding: 0.7rem 0.3rem;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 700;
+            border: 3px solid transparent;
+            transition: 0.1s linear;
+        }
+
+        .deck-card.selected {
+            border-color: #024c38 !important;
+            transform: scale(1.02);
+            filter: brightness(0.98);
+        }
+
+        .mazo-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid #fbb9d2;
+        }
+
+        .mazo-card strong {
+            color: #6f1a26;
+        }
+
+        .game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .score-header {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 40px;
+            width: 100%;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .coop-score-header {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 40px;
+            width: 100%;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .coop-score-header .turno {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #6f1a26;
+            margin-bottom: 0.25rem;
+        }
+
+        .game-card {
+            max-width: 400px;
+            width: 100%;
+            min-height: 420px;
+            background: white;
+            border-radius: 32px;
+            padding: 1.5rem;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+            transition: background 0.2s;
+        }
+
+        .game-card .card-header {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-card .card-header strong {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .game-card .card-question {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 0.75rem 0;
+            padding: 0.5rem;
+            overflow-y: auto;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+        .game-card .card-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .game-card .card-actions button {
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        .hand-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .hand-card {
+            width: 160px;
+            background: white;
+            border-radius: 20px;
+            padding: 0.8rem;
+            box-shadow: 0 8px 14px rgba(0, 0, 0, 0.1);
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            transition: 0.1s linear;
+            text-align: center;
+            font-weight: 500;
+            border-left: 6px solid #fbb9d2;
+            font-size: 0.7rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-y: auto;
+            max-height: 180px;
+        }
+
+        .hand-card:active {
+            cursor: grabbing;
+        }
+
+        .screen-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #6f1a26;
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .nota-investigacion {
+            background: #e8f4f8;
+            border-left: 4px solid #024c38;
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+            color: #024c38;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .pacto-compromiso {
+            background: white;
+            padding: 1.2rem;
+            border-radius: 16px;
+            border-left: 4px solid #6f1a26;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 2rem;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        .wildcard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .wildcard-card {
+            background: white;
+            padding: 1.2rem 0.8rem;
+            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .wildcard-card span {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .wildcard-card strong {
+            font-size: 0.9rem;
+            color: #6f1a26;
+        }
+
+        .wildcard-card small {
+            font-size: 0.7rem;
+            color: #666;
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .victory-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ffd700, #ffb347);
+            color: #6f1a26;
+            padding: 1rem 2rem;
+            border-radius: 60px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            z-index: 300;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeInOut 3s ease-in-out forwards;
+            white-space: nowrap;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            15% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            30% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            85% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+                visibility: hidden;
+            }
+        }
+
+        textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        @media (max-width: 550px) {
+            .screen {
+                padding: 4rem 0.8rem 2rem;
+                justify-content: center;
+            }
+
+            .hand-card {
+                width: 130px;
+                font-size: 0.65rem;
+                max-height: 160px;
+            }
+
+            .modality-card {
+                min-width: 100%;
+                padding: 1.2rem;
+            }
+
+            .modality-icon {
+                font-size: 2.5rem;
+            }
+
+            .modality-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .card-panel {
+                padding: 1.2rem;
+            }
+
+            .game-card {
+                min-height: 380px;
+                padding: 1rem;
+            }
+
+            .game-card .card-question {
+                font-size: 0.8rem;
+            }
+
+            .wildcard-card {
+                padding: 0.8rem 0.5rem;
+            }
+
+            .wildcard-card span {
+                font-size: 1.5rem;
+            }
+
+            .rhythm-card {
+                padding: 1.2rem;
+                min-width: 180px;
+            }
+
+            .rhythm-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .coop-score-header {
+                font-size: 0.8rem;
+            }
+
+            .coop-score-header .turno {
+                font-size: 0.9rem;
+            }
+
+            .victory-toast {
+                font-size: 1rem;
+                padding: 0.75rem 1.5rem;
+                white-space: normal;
+                text-align: center;
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="goToScreen('portadaScreen')">🏠</button>
+            <button class="nav-btn" onclick="goBack()">←</button>
+        </div>
+
+        <!-- Pantalla de portada -->
+        <div class="screen active" id="portadaScreen">
+            <div style="text-align:center; max-width:450px; margin:auto">
+                <h1 style="font-size:2.5rem; color:#6f1a26;">✨ Desenredos <br>Emocionales</h1>
+                <p style="margin:1rem 0 2rem">Un juego de parejas para conectar profundamente</p>
+                <button class="btn-primary" onclick="startFromBeginning()">Comenzar juego</button>
+            </div>
+        </div>
+
+        <!-- Pantalla de nombres -->
+        <div class="screen" id="playerNamesScreen">
+            <div class="card-panel">
+                <h2 class="screen-title">¿Cómo os llamáis?</h2>
+                <p class="text-center text-gray-600 mb-4">Decid vuestros nombres y correos para personalizar el juego</p>
+
+                <form onsubmit="submitPlayerNames(event)">
+                    <input type="text" id="p1Name" placeholder="Jugador/a 1 - Nombre" class="w-full p-3 border-2 rounded-xl mb-3" style="border-color:#fbb9d2" required>
+                    <input type="email" id="p1Email" placeholder="Correo electrónico - Jugador 1" class="w-full p-3 border-2 rounded-xl mb-3" style="border-color:#fbb9d2" required>
+                    <input type="text" id="p2Name" placeholder="Jugador/a 2 - Nombre" class="w-full p-3 border-2 rounded-xl mb-3" style="border-color:#fbb9d2" required>
+                    <input type="email" id="p2Email" placeholder="Correo electrónico - Jugador 2" class="w-full p-3 border-2 rounded-xl mb-4" style="border-color:#fbb9d2" required>
+
+                    <div class="nota-investigacion">
+                        <strong>📝 Nota importante:</strong> Para poder vincular tus progresos y que los resultados de tu participación sean precisos, utiliza el mismo nombre y correo electrónico que facilitaste en el cuestionario inicial. Esto garantiza que la información de tu "viaje" en la app se guarde correctamente bajo tu perfil anónimo de investigación.
+                    </div>
+
+                    <div class="flex gap-3 justify-center mt-4">
+                        <button type="button" class="btn-secondary" onclick="goToScreen('portadaScreen')">Atrás</button>
+                        <button type="submit" class="btn-primary">Continuar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ¿En qué consiste Desenredos Emocionales? -->
+        <div class="screen" id="infoScreen">
+            <div class="card-panel">
+                <h2 class="screen-title">¿En qué consiste Desenredos Emocionales?</h2>
+                <div class="text-left space-y-4 text-gray-700">
+                    <p>Desenredos Emocionales es un espacio diseñado para explorar vuestra relación desde la curiosidad y el cuidado mutuo. El juego os invita a "desenredar" vuestra conexión promoviendo conversaciones mediante preguntas abiertas que tienen la función de aumentar la calidad de vuestra relación de pareja.</p>
+                    <p>Contamos con 7 mazos temáticos creados a partir de literatura científica que aborda 4 temáticas: qué hace que una relación sea de calidad, cómo se pueden promover las dinámicas que fortalecen los factores de calidad (ej: aumentar la intimidad mediante la escucha activa), los motivos de ruptura y los factores de selección de pareja.</p>
+                </div>
+                <div class="flex gap-3 justify-center mt-6">
+                    <button class="btn-secondary" onclick="goToScreen('playerNamesScreen')">Atrás</button>
+                    <button class="btn-primary" onclick="goToScreen('mazosInfoScreen')">Continuar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Los 7 Mazos Temáticos - TEXTO ACTUALIZADO -->
+        <div class="screen" id="mazosInfoScreen">
+            <div class="card-panel">
+                <h2 class="screen-title">Los 7 Mazos Temáticos</h2>
+                <p class="text-center text-gray-600 mb-4">Cada mazo aborda un área específica de la relación basada en la evidencia:</p>
+
+                <div class="text-left space-y-2 max-h-[50vh] overflow-y-auto pr-2">
+                    <div class="mazo-card"><strong>💬 Comunicación y conflicto:</strong> con el objetivo de mejorar cómo resolvéis conflictos y entender como surgen.</div>
+                    <div class="mazo-card"><strong>🤝 Compromiso:</strong> buscando crear un proyecto de vida en común y aumentar la lealtad.</div>
+                    <div class="mazo-card"><strong>❤️ Intimidad:</strong> con este mazo aprenderá más cosas sobre su pareja, desde gustos actuales, hasta recuerdos de la infancia.</div>
+                    <div class="mazo-card"><strong>🔥 Sexualidad:</strong> aquí hablan sobre deseos, pasión, conexión física y sexo.</div>
+                    <div class="mazo-card"><strong>🛡️ Confianza:</strong> para fortalecer la seguridad y la base firme de vuestro vínculo.</div>
+                    <div class="mazo-card"><strong>⭐ Rasgos y Valores:</strong> descubrir como es la personalidad de tu pareja, dar aceptación y encontrar qué valores compartís.</div>
+                    <div class="mazo-card"><strong>👁️ Validación, valoración y percepción:</strong> Para reconocer los esfuerzos del otro, sentiros valorados y mejorar nuestra percepción del otro.</div>
+                </div>
+
+                <div class="nota-investigacion mt-4 text-center">
+                    📧 Para más información contacta al correo: <strong>desenredosemocionales@gmail.com</strong>
+                </div>
+
+                <div class="flex gap-3 justify-center mt-6">
+                    <button class="btn-secondary" onclick="goToScreen('infoScreen')">Atrás</button>
+                    <button class="btn-primary" onclick="goToScreen('pactamosScreen')">Continuar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual de normas -->
+        <div class="screen" id="pactamosScreen">
+            <div class="card-panel">
+                <h2 class="screen-title">Manual de normas</h2>
+                <div class="space-y-3 text-left">
+                    <p><strong>✋ Derecho de Reserva (Veto)</strong><br>Si una pregunta os genera incomodidad, cualquiera puede decir "paso". No hace falta explicación.</p>
+                    <p><strong>👂 Escucha sin Juicios</strong><br>El objetivo es conoceros mejor. Escuchad con curiosidad y evitad críticas.</p>
+                    <p><strong>🔐 Lo que pasa aquí, se queda aquí</strong><br>La información compartida es confidencial. No se usa como "arma" en futuras discusiones.</p>
+                    <p><strong>⏸️ Saber parar</strong><br>Si el ambiente se tensa, detened el juego. En conflictos graves, buscad apoyo profesional.</p>
+                    <div class="nota-investigacion mt-3">
+                        <strong>📊 Registro de Datos (Investigativo)</strong><br>
+                        Este juego registra la <strong>fecha, modalidad, mazos seleccionados y duración de cada partida</strong> en una hoja privada. Los datos se usan únicamente con fines investigativos para mejorar el juego. <strong>Solo los investigadores tienen acceso a esa información y los datos son anonimizados.</strong>
+                    </div>
+                </div>
+                <div class="flex gap-3 justify-center mt-6">
+                    <button class="btn-secondary" onclick="goToScreen('mazosInfoScreen')">Atrás</button>
+                    <button class="btn-primary" onclick="goToScreen('pactamosScreen2')">Aceptar y Continuar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pactamos (compromiso) -->
+        <div class="screen" id="pactamosScreen2">
+            <div class="card-panel">
+                <h2 class="screen-title">Pactamos</h2>
+                <p class="text-center text-gray-600 mb-3">Comunicación y seguridad antes de jugar</p>
+
+                <div class="text-left space-y-4">
+                    <p class="text-gray-700">Para empezar es esencial que os toméis un momento para <strong>pactar</strong>. Recordar que siempre es importante comunicar y tener acuerdos. Pactar el marco de juego garantiza que ambos os sintáis seguros y en sintonía.</p>
+
+                    <p class="text-gray-700">Antes de jugar se os irán haciendo unas preguntas que os ayudaran a llegar a pactos.</p>
+
+                    <div class="pacto-compromiso">
+                        <strong class="text-[#6f1a26]">El compromiso:</strong>
+                        <p class="mt-1">"Respetaremos el turno, escucharemos sin juzgar y cualquier carta puede ser vetada si genera malestar."</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 justify-center mt-6">
+                    <button class="btn-secondary" onclick="goToScreen('pactamosScreen')">Atrás</button>
+                    <button class="btn-primary" onclick="goToScreen('objetivoScreen')">Continuar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nuestro Objetivo -->
+        <div class="screen" id="objetivoScreen">
+            <div class="card-panel">
+                <h2 class="screen-title">🎯 Nuestro Objetivo</h2>
+                <p class="text-center text-gray-600 mb-4">Acordad vuestro objetivo para esta sesión: ¿Qué queréis conseguir jugando?</p>
+
+                <div class="mt-4">
+                    <label class="block text-gray-700 font-medium mb-2">Escribid vuestro objetivo:</label>
+                    <textarea id="objetivoPersonalizado" rows="3" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-[#fbb9d2] focus:outline-none" placeholder="Ej: Queremos reconectar después de un tiempo distanciados..."></textarea>
+                </div>
+
+                <div class="flex gap-3 justify-center mt-6">
+                    <button class="btn-secondary" onclick="goToScreen('pactamosScreen2')">Atrás</button>
+                    <button class="btn-primary" onclick="saveObjetivoAndContinue()">Continuar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- El Cierre -->
+        <div class="screen" id="cierreScreen">
+            <div class="card-panel">
+                <h2 class="screen-title">El Cierre</h2>
+                <p class="text-center text-gray-600 mb-4">¿Cómo os gustaría sentiros al terminar la sesión?</p>
+                <p class="text-center text-sm text-gray-500 mb-6">Visualizad el final de la experiencia para asegurar que el tono de vuestras respuestas de hoy os ayude a conseguirlo.</p>
+
+                <div class="mt-2">
+                    <label class="block text-gray-700 font-medium mb-2">Describid cómo queréis sentiros:</label>
+                    <textarea id="cierrePersonalizado" rows="3" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-[#fbb9d2] focus:outline-none" placeholder="Ej: Queremos sentir que hemos avanzado en un tema que nos preocupaba..."></textarea>
+                </div>
+
+                <div class="flex gap-3 justify-center mt-6">
+                    <button class="btn-secondary" onclick="goToScreen('objetivoScreen')">Atrás</button>
+                    <button class="btn-primary" onclick="saveCierreAndContinue()">Continuar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ritmo -->
+        <div class="screen" id="rhythmScreen">
+            <div style="text-align:center; max-width:500px; width:100%; margin:0 auto">
+                <h2 class="screen-title">¿Cómo quieres jugar?</h2>
+                <p class="text-center text-gray-600 mb-6">El juego no cambia, cambia el tiempo que dedicas a cada pregunta</p>
+                <div class="rhythm-grid">
+                    <div class="rhythm-card" onclick="selectRhythm(this,'fast')"><span class="text-4xl">⚡</span>
+                        <h3><strong>Modo Rápido</strong></h3>
+                        <p>Respuestas cortas y dinámicas</p>
+                    </div>
+                    <div class="rhythm-card" onclick="selectRhythm(this,'slow')"><span class="text-4xl">🌙</span>
+                        <h3><strong>Modo Lento</strong></h3>
+                        <p>Respuestas profundas y reflexivas</p>
+                    </div>
+                </div>
+                <div class="flex gap-3 justify-center mt-8">
+                    <button class="btn-secondary" onclick="goToScreen('cierreScreen')">Atrás</button>
+                    <button class="btn-primary" id="rhythmNextBtn" disabled onclick="goToScreen('modalityScreen')">Continuar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modalidad -->
+        <div class="screen" id="modalityScreen">
+            <h2 class="screen-title">¿Cómo quieres jugar?</h2>
+            <p class="text-center text-gray-600 mb-6">Elige tu modalidad de juego</p>
+            <div class="modality-grid">
+                <div class="modality-card" onclick="selectModality(this,'basic')">
+                    <div class="modality-icon">🎯</div>
+                    <h3>Modalidad Exploratoria</h3>
+                    <p>Es la modalidad más sencilla. Simplemente desliza a derecha para responder o izquierda para descartar. Una carta a la vez. Podeis ganar puntos infinitos.</p>
+                </div>
+                <div class="modality-card" onclick="selectModality(this,'dynamic')">
+                    <div class="modality-icon">🎲</div>
+                    <h3>Modalidad Dinámica</h3>
+                    <p>Es la modalidad más parecida a un juego de mesa. <strong>CADA JUGADOR ELIGE EL MAZO CON EL QUE JUGARÁ SU PAREJA</strong>, de ese mazo se te darán 5 cartas. Gestiona tu mano de 5 cartas, puedes descartar cartas, responder o pasar turno sin jugar. Una vez descartes o respondas una carta, aparecera una nueva. Responder suma puntos. Primero a 5 puntos gana. ¡Más estrategia!</p>
+                </div>
+                <div class="modality-card" onclick="selectModality(this,'cooperation')">
+                    <div class="modality-icon">🤝</div>
+                    <h3>Modalidad Cooperación</h3>
+                    <p>Trabaja en equipo hacia un objetivo común. Cada uno elige un mazo. En vuestro turno os aparecera una pregunta que puede pertecer a cualquier mazo. Sumais puntos si respondeis una pregunta de uno de los mazos elegido. El juego se gana cuando se alcanzan 5 puntos de cada mazo.</p>
+                </div>
+            </div>
+            <button class="btn-primary mt-6" id="modalityNextBtn" disabled onclick="goToScreen('comoinesScreen')">Continuar</button>
+        </div>
+
+        <!-- Cartas Dinamizadoras -->
+        <div class="screen" id="comoinesScreen">
+            <h2 class="screen-title">Cartas Dinamizadoras</h2>
+            <p class="text-center text-gray-600 mb-6"><strong>Estas cartas aparecen de forma aleatoria a lo largo de las partidas y cambian las reglas del juego</strong></p>
+            <div class="wildcard-grid">
+                <div class="wildcard-card"><span>🔄</span><strong>Cambiar Turno</strong><small>Tu pareja responde tu pregunta</small></div>
+                <div class="wildcard-card"><span>⚡</span><strong>Repetir Turno</strong><small>Vuelves a jugar</small></div>
+                <div class="wildcard-card"><span>🛑</span><strong>Bloqueo de Turno</strong><small>Tu pareja pierde su próximo turno</small></div>
+                <div class="wildcard-card"><span>⭐</span><strong>Bonus Puntos</strong><small>Suma 2 puntos en lugar de 1</small></div>
+            </div>
+            <div class="flex gap-3 mt-8">
+                <button class="btn-secondary" onclick="goToScreen('modalityScreen')">Atrás</button>
+                <button class="btn-primary" onclick="initDeckSelection()">Entendido</button>
+            </div>
+        </div>
+
+        <!-- Selección de mazos -->
+        <div class="screen" id="deckSelectionScreen">
+            <h2 class="screen-title">Elige los Mazos</h2>
+            <p class="text-center text-gray-600 mb-4" id="deckSelectionSubtitle"></p>
+            <div id="basicDecksPanel" style="display:none" class="w-full max-w-md mx-auto">
+                <div id="basicDecksGrid" class="grid grid-cols-2 gap-2"></div>
+                <button class="btn-secondary w-full mt-3" onclick="selectRandomBasic()">🎲 Jugamos Aleatorio (todos los mazos mezclados)</button>
+            </div>
+            <div id="dynamicDecksPanel" style="display:none" class="w-full max-w-md mx-auto">
+                <h3 class="font-bold mt-2">Jugador 1 elige el mazo para Jugador 2</h3>
+                <div id="p1DecksGrid" class="grid grid-cols-2 gap-2 mb-4"></div>
+                <h3 class="font-bold">Jugador 2 elige el mazo para Jugador 1</h3>
+                <div id="p2DecksGrid" class="grid grid-cols-2 gap-2"></div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button class="btn-secondary" onclick="goToScreen('comoinesScreen')">Atrás</button>
+                <button class="btn-primary" id="startGameFinalBtn" disabled onclick="launchGame()">Comenzar Juego</button>
+            </div>
+        </div>
+
+        <!-- Pantalla de juego -->
+        <div class="screen" id="gameScreen">
+            <div id="gameDynamicContent" class="game-wrapper"></div>
+        </div>
+
+        <!-- Modal fin del juego -->
+        <div class="modal" id="gameOverModal">
+            <div class="modal-content">
+                <h2 id="gameOverTitle">🎉 Partida finalizada</h2>
+                <p id="gameOverMsg" class="my-3"></p>
+                <div class="flex gap-3 justify-center">
+                    <button class="btn-secondary" onclick="closeGameOverAndRestart()">Cambiar Mazos</button>
+                    <button class="btn-primary" onclick="closeGameOverAndHome()">Volver al Inicio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ✅ TU LINK DE GOOGLE APPS SCRIPT
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzR-eIQd6zkSRWpnhk5T1VsIvXdgkRRizArvt3Gu30TRNN9T8ZGIbnXsRz0p3gAHVPh/exec";
+
+        // -------- MAZOS DE CARTAS ----------
+        const CARDS_DB = {
+            communication: [
+                "Durante una discusión tensa, ¿qué señal o frase de tu pareja (una broma, un gesto, un silencio) es capaz de bajar tus defensas y haceros reír o calmaros?",
+                "¿Sientes que a veces tu pareja o tú empezáis los temas importantes con sarcasmo o crítica en lugar de decir simplemente lo que necesita? ¿Cómo podríais pediros las cosas sin que parezca un ataque?",
+                "Si a tu pareja se le ha olvidado vuestro aniversario, ¿por qué crees que ha podido ser? ¿Cómo cambia tu reacción según lo que pienses?",
+                "¿Te has sentido decepcionado alguna vez de vuestra relación? Explica qué pasó y cómo se resolvió, o si no se ha podido solucionar aún...",
+                "¿En qué momentos sientes que tu pareja 'se cierra en banda' o deja de escucharte? ¿Qué necesitas de tu pareja en ese instante para sentir que no te está abandonando emocionalmente?",
+                "¿Hay algún conflicto que siempre vuelve y nunca cerráis? Detrás de esa discusión, ¿qué sueño o valor personal sientes que no se está teniendo en cuenta?",
+                "¿Qué es lo que más te cuesta perdonar en una persona?",
+                "¿Qué es lo primero que piensas cuando tienes una discusión fuerte con tu pareja?",
+                "¿Cómo podéis saber que una discusión se os está saliendo de control? ¿Qué hacéis cuando eso pasa?",
+                "Cuando tenéis discusiones en las que hay enfados o sentimientos heridos, ¿quién suele dar el primer paso para hablar?",
+                "¿Cómo reaccionas cuando te enfadas? ¿Qué cosas haces para procesar tus emociones?",
+                "¿Cuál es tu mayor 'pet peeve' (esa pequeña cosa que te irrita mucho)?",
+                "Si tu relación termina mañana: ¿Cuál crees que sería el motivo? ¿Cómo podríais evitarlo?",
+                "Si tuvierais un conflicto grave de pareja, ¿estarías dispuesto/a a ir a terapia de pareja?",
+                "¿Cuáles son tus expectativas en cuanto a roles y responsabilidades en nuestra relación? ¿Hay algún ajuste que te gustaría hacer?",
+                "¿Cómo te sientes cuando no estamos de acuerdo en algo importante?",
+                "Si alguno de los dos decide tener un hijo (biológico o adoptivo), ¿seguiríamos juntos?",
+                "Actualmente o en el pasado, ¿hay algo por lo que estás sufriendo dentro de la relación? Si es del presente, di cómo crees que podría solucionarse. Si es del pasado, explica por qué dejaron de hacerse daño.",
+                "En caso de no poder concebir de forma 'natural' y querer tener hijos, ¿qué opciones están contempladas? (Adopción, fecundación in vitro, vientre de alquiler, reproducción asistida...)",
+                "¿Sientes que el estrés del trabajo o la logística de la casa/hijos nos está haciendo interactuar como 'socios' en lugar de como pareja? ¿Qué momento del día deberíamos blindar para nosotros?",
+                "¿Cuál es ese problema o discusión recurrente que sientes que ya no es culpa de ninguno de los dos, sino un 'tercer invitado' en nuestra relación? ¿Cómo podéis uniros para analizarlo juntos sin reproches?",
+                "¿Qué actividades de autocuidado realizas para mantener tu bienestar cuando tu pareja no puede darte lo que necesitas en un momento de conflicto? ¿Cómo puede apoyar esos espacios tuyos?",
+                "¿Hay alguna conducta de tu pareja que te moleste, pero cuya intención entiendes (por ejemplo, que se aleje cuando estoy estresado para no pagarlo contigo)? ¿Cómo podemos validar esa intención mientras buscamos una forma mejor de actuar?"
+            ],
+            trust: [
+                "¿Quién crees que debería llevar el control de los gastos comunes y cómo os aseguraríais de que ambos estéis conformes?",
+                "¿Quién crees que debería tomar las decisiones importantes en la pareja? ¿Sientes que tu opinión tiene el mismo peso que la de tu pareja en vuestro día a día?",
+                "¿Te sientes cómodo/a llorando o mostrándote vulnerable frente a mí? ¿Qué necesito hacer yo en ese momento para que te sientas seguro/a?",
+                "¿Hay algo de tu pasado que sientas que aún no me has contado? (Recordad que podéis usar el veto si no es el momento de compartirlo).",
+                "¿Alguna vez has sentido que no podías decirme algo por miedo a mi reacción? Si ocurrió, ¿cómo podemos evitar que vuelva a pasar?",
+                "Si ganaras la lotería hoy mismo, ¿cómo gestionarías ese dinero con respecto a nuestra relación?",
+                "¿Qué opinas sobre el papel de cada uno si tuvierais a alguien a vuestro cuidado? ¿Crees que el reparto de poder y cuidado sería equitativo?",
+                "¿Qué importancia tiene para ti que cada uno mantenga su espacio social (amigos, familia) a solas? ¿Cómo te sientes cuando tu pareja lo hace?",
+                "¿Sientes que tu pareja te da suficiente espacio para cultivar tus propias amistades sin sentirte vigilado/a o juzgado/a? Si no es así, piensa cómo puedes hacerlo sin dejar de dar seguridad y cuidado a tu pareja.",
+                "¿Qué actividad te hace sentir más 'tú mismo/a' cuando estás solo/a? ¿Cómo te puede apoyar tu pareja para que tengas más tiempo para esa actividad?",
+                "¿Qué opinas sobre compartir contraseñas (móvil, redes, ordenador) con la pareja? ¿Es para ti una señal de confianza o una invasión de la privacidad?",
+                "¿Qué opinas sobre el uso de las redes sociales en nuestra relación? ¿Hay algo que te genere inseguridad o que consideres una falta de respeto?",
+                "Dime 5 cosas que crees que le desagradan a los demás de ti. ¿Cómo te sientes cuando me las muestras a mí?",
+                "¿Cuáles son los objetivos que tienes solo para ti (fuera de la pareja) en este momento? ¿Sientes que tu pareja los respeta?",
+                "¿Tienes alguna ambición 'secreta' o un sueño que no suelas compartir por miedo a que parezca ridículo?",
+                "¿Cuál es un placer culpable que puedas admitir?",
+                "¿Qué es el feminismo para ti? ¿Eres feminista? ¿Quién puede ser feminista? ¿Crees que tus valores y los de tu pareja en este tema están alineados o hay discrepancias?",
+                "¿Tienes algún detonante emocional? ¿Cómo te gusta que los demás te ayuden a gestionarlo?",
+                "¿Hay alguna regla social que te encantaría romper? ¿Te sentirías apoyado/a por mí si lo hicieras?",
+                "¿Qué parte de tu día prefieres pasar a solas sin interrupciones?",
+                "¿Hay algún hobby que te gustaría hacer solo/a, sin mí?",
+                "¿Qué tipo de personas te dan más lástima?",
+                "¿Cómo te gustaría que te recordaran el día que ya no estés?",
+                "¿Sientes que puedes ser tú mismo/a conmigo, incluso en tus aspectos más difíciles, sin miedo a que intente 'repararte' o juzgarte?",
+                "Si vuestra confianza se viera dañada por un error grave (como una deslealtad), ¿crees que tendríais la capacidad de trabajar en la aceptación emocional de lo ocurrido para reconstruir la relación, o crees que sería un límite insuperable?"
+            ],
+            commitment: [
+                "¿Qué es para ti una 'casa limpia' y qué expectativas tienes sobre cómo deberíais mantener ese estándar entre los dos?",
+                "¿Cómo imaginas que debería ser el reparto de tareas para que ambos sintamos que es justo? ¿Sabéis ambos realizar todas las tareas del hogar?",
+                "¿Hay alguna tarea del hogar que odies profundamente y que yo podría hacer?",
+                "¿Cómo os organizaríais si uno de los dos tuviera que trabajar mucho más tiempo? ¿Sientes que tu pareja es flexible y se ofrece a ayudarte con tus responsabilidades cuando estás saturado/a de trabajo o estrés?",
+                "¿Estarías dispuesto/a a mudarte de ciudad por el trabajo de tu pareja? ¿Bajo qué condiciones?",
+                "¿Cómo os gustaría manejar las finanzas si mañana uno de los dos quedara sin trabajo? ¿Tenéis un plan de respaldo en caso de que esto suceda?",
+                "¿Qué harías si mañana descubres que hay una deuda que triplica los ingresos?",
+                "¿Qué haces cuando te sientes muy estresado/a? ¿Cómo puede ayudarte de manera específica tu pareja?",
+                "¿Cuáles son tus tres más grandes preocupaciones actuales? ¿Tu pareja está haciendo algo que esté ayudando a resolverlas? Si es así, agradécele; si no es así, comunica qué puede hacer tu pareja para ayudarte.",
+                "¿Cómo te gustaría que fuera vuestra relación con vuestras familias políticas? ¿Dónde ponéis los límites?",
+                "¿Qué importancia le das a la opinión de tus amigos o círculo social sobre nuestra relación?",
+                "¿Qué es para ti la fidelidad? A continuación escribe 5 cosas que para ti sean una infidelidad y 5 cosas que pueden parecerlo, pero no lo son. Léelas a tu pareja y que ella diga si está de acuerdo o no.",
+                "¿Si te fueran infiel terminarías la relación? ¿Y si fueras tú quien comete la infidelidad? Define tus límites.",
+                "¿Quieres tener hijos (biológicos o adoptados)? ¿Por qué y en qué momento vital? Explica qué representan los hijos para ti.",
+                "Si ocurriera un embarazo no planificado ahora mismo, ¿cuál sería nuestra posición? ¿Cómo afectaría a nuestro futuro? (Si no hay posibilidades de embarazo, pensad en cualquier otra situación que implique que debáis cuidar a un tercero: una mascota, un amigo o familiar que necesite cuidados)",
+                "¿Cómo crees que se debe manejar la educación y valores de los hijos? (Contestad la pregunta aunque no los haya y no queráis tener)",
+                "¿Te gustaría casarte o formalizar la relación? Justifica tu visión del compromiso legal y del compromiso simbólico. Si estáis en modo partida profunda, junto a tu pareja imagina tu boda soñada o qué acción demostraría ese nivel de compromiso.",
+                "¿Qué importancia tiene para ti el éxito profesional comparado con el éxito de nuestra vida personal?",
+                "¿Hay alguien a quien odies? ¿Crees que odiar a alguien es razonable? Si no odias a nadie... ¿Hay alguien que últimamente te genere tensiones o irritabilidad?",
+                "¿Qué aventuras (viajes, proyectos, pasatiempos) te gustaría tener con tu pareja este año? Di al menos 3 cosas que se puedan implementar en vuestra rutina y una que sea un momento puntual.",
+                "¿Qué es para ti un 'para siempre'? ¿Crees que el amor lo puede todo o hay límites infranqueables?",
+                "¿Qué legado o huella te gustaría dejar en el mundo? ¿Qué legado queréis dejar como pareja?",
+                "¿Cómo te gustaría celebrar vuestro 25º aniversario? ¿Qué simbolizaría para ti?",
+                "Si pudieras diseñar nuestra casa ideal, ¿qué no podría faltar?",
+                "¿Qué quieres ser cuando seas grande? (¿Cuál es tu idea del futuro en 6 meses, 1 año, 5 años y 10 años?)",
+                "¿Por qué crees que hay tantos divorcios/separaciones/rupturas hoy en día?",
+                "¿Qué es lo que más te gusta de nuestra relación y qué crees que podríamos mejorar juntos?"
+            ],
+            intimacy: [
+                "¿Qué significa intimidad para ti?",
+                "¿Cuándo te sientes más cerca de mí?",
+                "¿Qué te hace vulnerable?",
+                "¿Cómo podemos profundizar nuestra conexión?",
+                "¿Qué necesitas de mí en los momentos difíciles?",
+                "¿Cuál es tu recuerdo más feliz de tu infancia?",
+                "¿Qué es lo que más admiras de tus padres o figuras de autoridad?"
+            ],
+            sexuality: [
+                "¿Qué te hace sentir deseado/a?",
+                "¿Cómo te gustaría que iniciara el contacto íntimo?",
+                "¿Qué fantasía te gustaría compartir?",
+                "¿Qué significa para ti una vida sexual plena?",
+                "¿Cómo te gustaría que mejoremos nuestra vida sexual?",
+                "¿Qué es lo que más te gusta de nuestro tiempo íntimo?"
+            ],
+            values: [
+                "¿Cuál es tu valor más importante en la vida?",
+                "¿Qué principios guían tus decisiones?",
+                "¿Qué sueños tenemos en común?",
+                "¿Qué legado queremos construir?",
+                "¿Qué te hace sentir orgulloso de ti mismo?",
+                "¿Qué cualidades admiras más en los demás?"
+            ],
+            validation: [
+                "¿Qué aprecias más de mí?",
+                "¿Cómo te gustaría que te valorara más?",
+                "¿Cuándo te sientes realmente especial?",
+                "¿Qué te enorgullece de nosotros?",
+                "¿Cómo me haces sentir especial?",
+                "¿Qué gesto mío te hace sentir más querido/a?"
+            ]
+        };
+
+        const ALL_CARDS = [
+            ...CARDS_DB.communication,
+            ...CARDS_DB.trust,
+            ...CARDS_DB.commitment,
+            ...CARDS_DB.intimacy,
+            ...CARDS_DB.sexuality,
+            ...CARDS_DB.values,
+            ...CARDS_DB.validation
+        ];
+
+        const DECK_NAMES = {
+            intimacy: "Intimidad",
+            commitment: "Compromiso",
+            communication: "Comunicación y Conflicto",
+            trust: "Confianza",
+            sexuality: "Sexualidad",
+            values: "Valores",
+            validation: "Validación"
+        };
+
+        const DECK_COLORS = {
+            intimacy: "#ff5b1f",
+            commitment: "#fbb9d2",
+            communication: "#024c38",
+            trust: "#6f1a26",
+            sexuality: "#ade4e2",
+            values: "#ffffff",
+            validation: "#000000"
+        };
+
+        const DECK_TEXT = {
+            intimacy: "white",
+            commitment: "black",
+            communication: "white",
+            trust: "white",
+            sexuality: "black",
+            values: "#024c38",
+            validation: "white"
+        };
+
+        const WILDCARDS = [{
+                type: "switchTurn",
+                emoji: "🔄",
+                label: "Cambiar Turno"
+            },
+            {
+                type: "repeatTurn",
+                emoji: "⚡",
+                label: "Repetir Turno"
+            },
+            {
+                type: "blockTurn",
+                emoji: "🛑",
+                label: "Bloqueo"
+            },
+            {
+                type: "bonusPoints",
+                emoji: "⭐",
+                label: "+2 Puntos"
+            }
+        ];
+
+        let game = {
+            rhythm: null,
+            modality: null,
+            p1Name: "",
+            p2Name: "",
+            p1Email: "",
+            p2Email: "",
+            p1Deck: null,
+            p2Deck: null,
+            p1Score: 0,
+            p2Score: 0,
+            currentPlayer: 1,
+            currentCard: null,
+            currentCardDeck: null,
+            p1Hand: [],
+            p2Hand: [],
+            blockedPlayer: null,
+            extraTurn: false,
+            objetivo: "",
+            cierre: "",
+            gameStartTime: null,
+            gameEndTime: null,
+            gameDurationSeconds: 0,
+            isRandomMode: false
+        };
+        let screenHistory = ["portadaScreen"];
+
+        function showVictoryMessage(message) {
+            const toast = document.createElement('div');
+            toast.className = 'victory-toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        async function saveGameToSheets() {
+            const today = new Date();
+            const dateString = today.toISOString().split('T')[0];
+            
+            const modalityNames = {
+                basic: 'Exploratoria',
+                dynamic: 'Dinámica',
+                cooperation: 'Cooperación'
+            };
+            
+            const rhythmNames = {
+                fast: 'Rápido',
+                slow: 'Lento'
+            };
+
+            const gameData = {
+                fecha: dateString,
+                modalidad: modalityNames[game.modality] || game.modality,
+                ritmo: rhythmNames[game.rhythm] || game.rhythm,
+                jugador1_nombre: game.p1Name,
+                jugador1_email: game.p1Email,
+                jugador1_deck: game.isRandomMode ? "Aleatorio (todos los mazos)" : game.p1Deck,
+                jugador1_puntuacion: game.p1Score,
+                jugador2_nombre: game.p2Name,
+                jugador2_email: game.p2Email,
+                jugador2_deck: game.isRandomMode ? "Aleatorio (todos los mazos)" : game.p2Deck,
+                jugador2_puntuacion: game.p2Score,
+                duracion_segundos: game.gameDurationSeconds,
+                objetivo: game.objetivo,
+                cierre: game.cierre
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(gameData)
+                });
+                console.log('Datos enviados a Google Sheets');
+            } catch (error) {
+                console.error('Error al enviar datos:', error);
+            }
+        }
+
+        function goToScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (!screenHistory.includes(id)) screenHistory.push(id);
+            lucide.createIcons();
+        }
+
+        function goBack() {
+            if (screenHistory.length > 1) {
+                screenHistory.pop();
+                goToScreen(screenHistory[screenHistory.length - 1]);
+            }
+        }
+
+        function startFromBeginning() {
+            game = {
+                rhythm: null,
+                modality: null,
+                p1Name: "",
+                p2Name: "",
+                p1Email: "",
+                p2Email: "",
+                p1Deck: null,
+                p2Deck: null,
+                p1Score: 0,
+                p2Score: 0,
+                currentPlayer: 1,
+                currentCard: null,
+                currentCardDeck: null,
+                p1Hand: [],
+                p2Hand: [],
+                blockedPlayer: null,
+                extraTurn: false,
+                objetivo: "",
+                cierre: "",
+                gameStartTime: null,
+                gameEndTime: null,
+                gameDurationSeconds: 0,
+                isRandomMode: false
+            };
+            goToScreen("playerNamesScreen");
+        }
+
+        function submitPlayerNames(e) {
+            e.preventDefault();
+            game.p1Name = document.getElementById("p1Name").value.trim();
+            game.p1Email = document.getElementById("p1Email").value.trim();
+            game.p2Name = document.getElementById("p2Name").value.trim();
+            game.p2Email = document.getElementById("p2Email").value.trim();
+            goToScreen("infoScreen");
+        }
+
+        function saveObjetivoAndContinue() {
+            const personalizado = document.getElementById("objetivoPersonalizado").value.trim();
+            if (!personalizado) {
+                alert("Por favor, escribid vuestro objetivo para esta sesión.");
+                return;
+            }
+            game.objetivo = personalizado;
+            goToScreen("cierreScreen");
+        }
+
+        function saveCierreAndContinue() {
+            const personalizado = document.getElementById("cierrePersonalizado").value.trim();
+            if (!personalizado) {
+                alert("Por favor, describid cómo os gustaría sentiros al terminar la sesión.");
+                return;
+            }
+            game.cierre = personalizado;
+            goToScreen("rhythmScreen");
+        }
+
+        function selectRhythm(el, r) {
+            document.querySelectorAll('.rhythm-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            game.rhythm = r;
+            document.getElementById("rhythmNextBtn").disabled = false;
+        }
+
+        function selectModality(el, m) {
+            document.querySelectorAll('.modality-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            game.modality = m;
+            document.getElementById("modalityNextBtn").disabled = false;
+        }
+
+        function initDeckSelection() {
+            const basicDiv = document.getElementById("basicDecksPanel");
+            const dynamicDiv = document.getElementById("dynamicDecksPanel");
+            const subtitle = document.getElementById("deckSelectionSubtitle");
+
+            if (game.modality === "basic") {
+                basicDiv.style.display = "block";
+                dynamicDiv.style.display = "none";
+                subtitle.textContent = "Elige un mazo para explorar juntos";
+                const container = document.getElementById("basicDecksGrid");
+                container.innerHTML = "";
+                for (let d in CARDS_DB) {
+                    container.innerHTML += `<div class="deck-card" style="background:${DECK_COLORS[d]}; color:${DECK_TEXT[d]}; border:3px solid transparent" onclick="selectBasicDeck('${d}', this)">${DECK_NAMES[d]}</div>`;
+                }
+            } else {
+                basicDiv.style.display = "none";
+                dynamicDiv.style.display = "block";
+                subtitle.textContent = game.modality === "dynamic" ? "Cada jugador elige el mazo con el que jugará su pareja" : "Cada jugador elige su mazo para cooperar";
+                const p1Grid = document.getElementById("p1DecksGrid"),
+                    p2Grid = document.getElementById("p2DecksGrid");
+                p1Grid.innerHTML = "";
+                p2Grid.innerHTML = "";
+                for (let d in CARDS_DB) {
+                    p1Grid.innerHTML += `<div class="deck-card" style="background:${DECK_COLORS[d]}; color:${DECK_TEXT[d]}" onclick="selectDynamicDeck(1, '${d}', this)">${DECK_NAMES[d]}</div>`;
+                    p2Grid.innerHTML += `<div class="deck-card" style="background:${DECK_COLORS[d]}; color:${DECK_TEXT[d]}" onclick="selectDynamicDeck(2, '${d}', this)">${DECK_NAMES[d]}</div>`;
+                }
+            }
+            goToScreen("deckSelectionScreen");
+        }
+
+        function selectBasicDeck(deck, el) {
+            document.querySelectorAll("#basicDecksGrid .deck-card").forEach(c => c.classList.remove("selected"));
+            el.classList.add("selected");
+            game.p1Deck = deck;
+            game.p2Deck = deck;
+            game.isRandomMode = false;
+            document.getElementById("startGameFinalBtn").disabled = false;
+        }
+
+        function selectRandomBasic() {
+            game.p1Deck = null;
+            game.p2Deck = null;
+            game.isRandomMode = true;
+            document.querySelectorAll("#basicDecksGrid .deck-card").forEach(c => c.classList.remove("selected"));
+            document.getElementById("startGameFinalBtn").disabled = false;
+            alert("🎲 Modo Aleatorio: Usaremos cartas de TODOS los mazos mezclados");
+        }
+
+        function selectDynamicDeck(player, deck, el) {
+            const selector = player === 1 ? "#p1DecksGrid .deck-card" : "#p2DecksGrid .deck-card";
+            document.querySelectorAll(selector).forEach(c => c.classList.remove("selected"));
+            el.classList.add("selected");
+            if (player === 1) game.p1Deck = deck;
+            else game.p2Deck = deck;
+            if (game.p1Deck && game.p2Deck) document.getElementById("startGameFinalBtn").disabled = false;
+        }
+
+        function getRandomCardFromAllDecks() {
+            return ALL_CARDS[Math.floor(Math.random() * ALL_CARDS.length)];
+        }
+
+        function getRandomCardFromDeck(deck) {
+            return CARDS_DB[deck][Math.floor(Math.random() * CARDS_DB[deck].length)];
+        }
+
+        function getDeckNameFromCard(cardText) {
+            for (let deck in CARDS_DB) {
+                if (CARDS_DB[deck].includes(cardText)) {
+                    return deck;
+                }
+            }
+            return "intimacy";
+        }
+
+        function getRandomWildcard() {
+            return { ...WILDCARDS[Math.floor(Math.random() * WILDCARDS.length)] };
+        }
+
+        function drawCardFromDeck(deck, isWildcardPossible = true) {
+            if (isWildcardPossible && Math.random() < 0.2) return {
+                text: getRandomWildcard().emoji,
+                isWildcard: true,
+                wildcardData: getRandomWildcard()
+            };
+            let cardText;
+            if (game.isRandomMode && game.modality === "basic") {
+                cardText = getRandomCardFromAllDecks();
+                return { text: cardText, isWildcard: false, deck: getDeckNameFromCard(cardText) };
+            }
+            cardText = getRandomCardFromDeck(deck);
+            return { text: cardText, isWildcard: false, deck: deck };
+        }
+
+        function initHands() {
+            game.p1Hand = [];
+            game.p2Hand = [];
+            for (let i = 0; i < 5; i++) {
+                game.p1Hand.push(drawCardFromDeck(game.p1Deck, true));
+                game.p2Hand.push(drawCardFromDeck(game.p2Deck, true));
+            }
+        }
+
+        async function endGame() {
+            game.gameEndTime = Date.now();
+            game.gameDurationSeconds = Math.floor((game.gameEndTime - game.gameStartTime) / 1000);
+            
+            let message = "";
+            if (game.modality === "basic") {
+                message = `📊 Resumen de la sesión:\n\n${game.p1Name} respondió ${game.p1Score} preguntas\n${game.p2Name} respondió ${game.p2Score} preguntas\nTotal de preguntas respondidas: ${game.p1Score + game.p2Score}\n\n¡Gracias por jugar!`;
+            } else if (game.modality === "dynamic") {
+                if (game.p1Score > game.p2Score) {
+                    message = `🏆 ¡${game.p1Name} es el/la ganador/a!\n\nPuntuación final:\n${game.p1Name}: ${game.p1Score} puntos\n${game.p2Name}: ${game.p2Score} puntos`;
+                } else if (game.p2Score > game.p1Score) {
+                    message = `🏆 ¡${game.p2Name} es el/la ganador/a!\n\nPuntuación final:\n${game.p1Name}: ${game.p1Score} puntos\n${game.p2Name}: ${game.p2Score} puntos`;
+                } else {
+                    message = `🤝 ¡Han empatado!\n\nPuntuación final:\n${game.p1Name}: ${game.p1Score} puntos\n${game.p2Name}: ${game.p2Score} puntos`;
+                }
+            } else if (game.modality === "cooperation") {
+                message = `🎉 ¡Han completado la sesión cooperativa!\n\nPuntuación final:\n${DECK_NAMES[game.p1Deck]}: ${game.p1Score} puntos\n${DECK_NAMES[game.p2Deck]}: ${game.p2Score} puntos\nTotal: ${game.p1Score + game.p2Score}/10 puntos\n\n¡Gran trabajo en equipo!`;
+            }
+            document.getElementById("gameOverTitle").innerHTML = "🎮 Partida Finalizada";
+            document.getElementById("gameOverMsg").innerHTML = message;
+            document.getElementById("gameOverModal").classList.add("active");
+            
+            await saveGameToSheets();
+        }
+
+        function closeGameOverAndRestart() {
+            document.getElementById("gameOverModal").classList.remove("active");
+            goToScreen("deckSelectionScreen");
+        }
+
+        function closeGameOverAndHome() {
+            document.getElementById("gameOverModal").classList.remove("active");
+            startFromBeginning();
+        }
+
+        function renderGameUI() {
+            const container = document.getElementById("gameDynamicContent");
+            if (game.modality === "basic") {
+                const turnText = `🎲 Turno de ${game.currentPlayer === 1 ? game.p1Name : game.p2Name}`;
+                container.innerHTML = `
+                    <div class="score-header">${turnText}<br>📊 ${game.p1Name}: ${game.p1Score} preguntas | ${game.p2Name}: ${game.p2Score} preguntas</div>
+                    <div class="game-card" id="activeGameCard" style="background:${DECK_COLORS[game.currentCardDeck] || '#fff'}; color:${DECK_TEXT[game.currentCardDeck] || '#000'}">
+                        <div class="card-header"><strong>${DECK_NAMES[game.currentCardDeck] || (game.isRandomMode ? "Aleatorio" : "Carta")}</strong></div>
+                        <div class="card-question">${game.currentCard}</div>
+                        <div class="card-actions">
+                            <button class="btn-secondary" onclick="discardAction()">← Descartar</button>
+                            <button class="btn-primary" onclick="answerAction()">Responder →</button>
+                        </div>
+                    </div>
+                    <button class="btn-end" onclick="endGame()">🏁 Finalizar partida</button>`;
+            } else if (game.modality === "dynamic") {
+                const currentHand = game.currentPlayer === 1 ? game.p1Hand : game.p2Hand;
+                const currentDeck = game.currentPlayer === 1 ? game.p1Deck : game.p2Deck;
+                let handHtml = `<div class="score-header">🎲 Turno: ${game.currentPlayer === 1 ? game.p1Name : game.p2Name} | 🏆 ${game.p1Name}: ${game.p1Score} | ${game.p2Name}: ${game.p2Score}</div><div class="hand-container" id="dynamicHandContainer">`;
+                currentHand.forEach((card, idx) => {
+                    let bg = card.isWildcard ? "#ffffff" : DECK_COLORS[currentDeck];
+                    let color = card.isWildcard ? "#024c38" : (DECK_TEXT[currentDeck] || "black");
+                    let border = card.isWildcard ? "2px solid #024c38" : "none";
+                    let displayText = card.isWildcard ? card.text + " " + (card.wildcardData?.label || "") : card.text;
+                    handHtml += `<div class="hand-card" draggable="true" data-index="${idx}" style="background:${bg}; color:${color}; border-left:6px solid #fbb9d2; border:${border}"><strong>${displayText.length > 100 ? displayText.substring(0, 100) + "..." : displayText}</strong></div>`;
+                });
+                handHtml += `</div><div class="text-center mt-3"><button class="btn-secondary" onclick="endTurnDynamic()">🔄 Terminar turno sin jugar</button></div><p class="text-center text-xs text-gray-500 mt-2">👉 Desliza carta DERECHA = Responder (+1 punto) | IZQUIERDA = Descartar</p><button class="btn-end" onclick="endGame()">🏁 Finalizar partida</button>`;
+                container.innerHTML = handHtml;
+                attachDragEvents();
+            } else if (game.modality === "cooperation") {
+                container.innerHTML = `
+                    <div class="coop-score-header">
+                        <div class="turno">🎲 Turno de ${game.currentPlayer === 1 ? game.p1Name : game.p2Name}</div>
+                        <div>📚 ${DECK_NAMES[game.p1Deck] || "Mazo 1"}: ${game.p1Score} | ${DECK_NAMES[game.p2Deck] || "Mazo 2"}: ${game.p2Score} | Total: ${game.p1Score + game.p2Score}/10</div>
+                    </div>
+                    <div class="game-card" id="coopGameCard" style="background:${DECK_COLORS[game.currentCardDeck] || '#fff'}; color:${DECK_TEXT[game.currentCardDeck] || '#000'}">
+                        <div class="card-header"><strong>${DECK_NAMES[game.currentCardDeck] || "Pregunta"}</strong></div>
+                        <div class="card-question">${game.currentCard}</div>
+                        <div class="card-actions">
+                            <button class="btn-secondary" onclick="discardCoop()">← Descartar</button>
+                            <button class="btn-primary" onclick="answerCoop()">Responder →</button>
+                        </div>
+                    </div>
+                    <p class="text-center text-xs text-gray-500 mt-3">✨ Solo sumas punto si la pregunta es de uno de los mazos que habéis elegido</p>
+                    <button class="btn-end" onclick="endGame()">🏁 Finalizar partida</button>`;
+            }
+            lucide.createIcons();
+        }
+
+        function attachDragEvents() {
+            const cards = document.querySelectorAll(".hand-card");
+            cards.forEach(card => {
+                let startX = 0, diff = 0;
+                const onStart = (e) => { startX = e.clientX || e.touches?.[0]?.clientX; };
+                const onMove = (e) => { if (e.clientX) diff = e.clientX - startX; else if (e.touches) diff = e.touches[0].clientX - startX; };
+                const onEnd = () => {
+                    if (Math.abs(diff) > 50) {
+                        const idx = parseInt(card.dataset.index);
+                        if (diff > 0) answerDynamicCard(idx);
+                        else discardDynamicCard(idx);
+                    }
+                    diff = 0;
+                };
+                card.addEventListener("dragstart", onStart);
+                card.addEventListener("drag", onMove);
+                card.addEventListener("dragend", onEnd);
+                card.addEventListener("touchstart", onStart);
+                card.addEventListener("touchmove", onMove);
+                card.addEventListener("touchend", onEnd);
+                card.setAttribute("draggable", "true");
+            });
+        }
+
+        function checkDynamicWin() {
+            if (game.p1Score >= 5) {
+                showVictoryMessage(`🏆 ¡${game.p1Name} HA GANADO! 🏆`);
+                endGame();
+                return true;
+            } else if (game.p2Score >= 5) {
+                showVictoryMessage(`🏆 ¡${game.p2Name} HA GANADO! 🏆`);
+                endGame();
+                return true;
+            }
+            return false;
+        }
+
+        function checkCoopWin() {
+            if (game.p1Score >= 5 && game.p2Score >= 5) {
+                showVictoryMessage(`🎉 ¡HAN GANADO JUNTOS! 🎉`);
+                endGame();
+                return true;
+            }
+            return false;
+        }
+
+        function answerAction() {
+            if (game.currentPlayer === 1) game.p1Score++;
+            else game.p2Score++;
+            game.currentPlayer = game.currentPlayer === 1 ? 2 : 1;
+            nextBasicCard();
+        }
+
+        function discardAction() {
+            game.currentPlayer = game.currentPlayer === 1 ? 2 : 1;
+            nextBasicCard();
+        }
+
+        function nextBasicCard() {
+            if (game.isRandomMode) {
+                game.currentCard = getRandomCardFromAllDecks();
+                game.currentCardDeck = getDeckNameFromCard(game.currentCard);
+            } else {
+                const deck = game.currentPlayer === 1 ? game.p1Deck : game.p2Deck;
+                game.currentCard = getRandomCardFromDeck(deck);
+                game.currentCardDeck = deck;
+            }
+            renderGameUI();
+        }
+
+        function answerDynamicCard(index) {
+            const hand = game.currentPlayer === 1 ? game.p1Hand : game.p2Hand;
+            const card = hand[index];
+            if (card.isWildcard) {
+                applyWildcard(card.wildcardData.type);
+                hand.splice(index, 1);
+                hand.push(drawCardFromDeck(game.currentPlayer === 1 ? game.p1Deck : game.p2Deck, true));
+                renderGameUI();
+                if (!game.extraTurn) game.currentPlayer = game.currentPlayer === 1 ? 2 : 1;
+                game.extraTurn = false;
+                if (checkDynamicWin()) return;
+                renderGameUI();
+                return;
+            }
+            if (game.currentPlayer === 1) game.p1Score++;
+            else game.p2Score++;
+            hand.splice(index, 1);
+            hand.push(drawCardFromDeck(game.currentPlayer === 1 ? game.p1Deck : game.p2Deck, true));
+            if (checkDynamicWin()) return;
+            game.currentPlayer = game.currentPlayer === 1 ? 2 : 1;
+            renderGameUI();
+        }
+
+        function discardDynamicCard(index) {
+            const hand = game.currentPlayer === 1 ? game.p1Hand : game.p2Hand;
+            hand.splice(index, 1);
+            hand.push(drawCardFromDeck(game.currentPlayer === 1 ? game.p1Deck : game.p2Deck, true));
+            game.currentPlayer = game.currentPlayer === 1 ? 2 : 1;
+            renderGameUI();
+        }
+
+        function endTurnDynamic() {
+            game.currentPlayer = game.currentPlayer === 1 ? 2 : 1;
+            renderGameUI();
+        }
+
+        function applyWildcard(type) {
+            if (type === "switchTurn") {
+                game.currentPlayer = game.currentPlayer === 1 ? 2 : 1;
+                alert("🔄 Turno cambiado → " + (game.currentPlayer === 1 ? game.p1Name : game.p2Name) + " responde esta carta");
+            } else if (type === "repeatTurn") {
+                game.extraTurn = true;
+                alert("⚡ ¡Repites turno! Juega otra carta");
+            } else if (type === "blockTurn") {
+                game.blockedPlayer = game.currentPlayer === 1 ? 2 : 1;
+                alert(`🛑 ${game.blockedPlayer === 1 ? game.p1Name : game.p2Name} pierde su próximo turno`);
+            } else if (type === "bonusPoints") {
+                if (game.currentPlayer === 1) game.p1Score += 2;
+                else game.p2Score += 2;
+                alert("⭐ +2 puntos extra por usar el comodín");
+                if (checkDynamicWin()) return;
+            }
+        }
+
+        function discardCoop() {
+            game.currentPlayer = game.currentPlayer === 1 ? 2 : 1;
+            nextCoopCard();
+        }
+
+        function answerCoop() {
+            const currentDeck = game.currentCardDeck;
+            if (currentDeck === game.p1Deck && game.currentPlayer === 1) game.p1Score++;
+            if (currentDeck === game.p2Deck && game.currentPlayer === 2) game.p2Score++;
+            if (checkCoopWin()) return;
+            game.currentPlayer = game.currentPlayer === 1 ? 2 : 1;
+            nextCoopCard();
+        }
+
+        function nextCoopCard() {
+            const allDecks = Object.keys(CARDS_DB);
+            const randomDeck = allDecks[Math.floor(Math.random() * allDecks.length)];
+            game.currentCard = getRandomCardFromDeck(randomDeck);
+            game.currentCardDeck = randomDeck;
+            renderGameUI();
+        }
+
+        function launchGame() {
+            game.p1Score = 0;
+            game.p2Score = 0;
+            game.currentPlayer = 1;
+            game.extraTurn = false;
+            game.blockedPlayer = null;
+            game.gameStartTime = Date.now();
+            
+            if (game.modality === "basic") {
+                if (game.isRandomMode) {
+                    game.currentCard = getRandomCardFromAllDecks();
+                    game.currentCardDeck = getDeckNameFromCard(game.currentCard);
+                } else {
+                    game.currentCard = getRandomCardFromDeck(game.p1Deck);
+                    game.currentCardDeck = game.p1Deck;
+                }
+                renderGameUI();
+                goToScreen("gameScreen");
+            } else if (game.modality === "dynamic") {
+                initHands();
+                renderGameUI();
+                goToScreen("gameScreen");
+            } else if (game.modality === "cooperation") {
+                const randDeck = Object.keys(CARDS_DB)[0];
+                game.currentCard = getRandomCardFromDeck(randDeck);
+                game.currentCardDeck = randDeck;
+                renderGameUI();
+                goToScreen("gameScreen");
+            }
+        }
+
+        window.answerAction = answerAction;
+        window.discardAction = discardAction;
+        window.answerDynamicCard = answerDynamicCard;
+        window.discardDynamicCard = discardDynamicCard;
+        window.endTurnDynamic = endTurnDynamic;
+        window.discardCoop = discardCoop;
+        window.answerCoop = answerCoop;
+        window.selectBasicDeck = selectBasicDeck;
+        window.selectRandomBasic = selectRandomBasic;
+        window.selectDynamicDeck = selectDynamicDeck;
+        window.initDeckSelection = initDeckSelection;
+        window.launchGame = launchGame;
+        window.goToScreen = goToScreen;
+        window.goBack = goBack;
+        window.startFromBeginning = startFromBeginning;
+        window.submitPlayerNames = submitPlayerNames;
+        window.selectRhythm = selectRhythm;
+        window.selectModality = selectModality;
+        window.saveObjetivoAndContinue = saveObjetivoAndContinue;
+        window.saveCierreAndContinue = saveCierreAndContinue;
+        window.endGame = endGame;
+        window.closeGameOverAndRestart = closeGameOverAndRestart;
+        window.closeGameOverAndHome = closeGameOverAndHome;
+    </script>
+</body>
+
+</html>
